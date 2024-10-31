@@ -77,8 +77,10 @@ const AIDetector = ({ imageSrc }) => {
         </div>
 
         {loading ? (
-          <div className="text-center text-gray-700 dark:text-gray-300">
-            Analyzing image...
+          <div className="flex flex-col items-center">
+            <div className="text-center text-gray-700 dark:text-gray-300">
+              <strong>Detecting AI...</strong>
+            </div>
           </div>
         ) : prediction ? (
           <div className="flex flex-col items-center">
