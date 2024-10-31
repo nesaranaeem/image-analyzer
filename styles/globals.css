@@ -1,0 +1,9 @@
+/* styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+  transition: background-color 0.3s, color 0.3s;
+}
