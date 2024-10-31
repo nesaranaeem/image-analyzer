@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import { Buffer } from "buffer";
 import PdfExporter from "./PdfExporter";
+import AIDetector from "./AIDetector";
 
 // Ensure Buffer is available
 if (typeof window !== "undefined") {
@@ -35,6 +36,7 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
   const [locationName, setLocationName] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [L, setL] = useState(null);
 
   // Dynamically import Leaflet and fix the marker images
@@ -70,14 +72,19 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
   // Fetch location name
   useEffect(() => {
     if (latitude && longitude) {
+      setLocationLoading(true);
       fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
       )
         .then((response) => response.json())
-        .then((data) =>
-          setLocationName(data.address?.city || data.display_name)
-        )
-        .catch(() => setLocationName("Location not found"));
+        .then((data) => {
+          setLocationName(data.address?.city || data.display_name);
+          setLocationLoading(false);
+        })
+        .catch(() => {
+          setLocationName("Location not found");
+          setLocationLoading(false);
+        });
     }
   }, [latitude, longitude]);
 
@@ -92,6 +99,7 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
 
   // Function to format date strings
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleString();
   };
@@ -104,7 +112,7 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
         .map(([key, value]) => `${key}: ${value}`)
         .join(", ");
     } catch {
-      return settings;
+      return settings || "N/A";
     }
   };
 
@@ -117,7 +125,7 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
         .join("");
       return `0x${hexString}`;
     }
-    return id;
+    return id || "N/A";
   };
 
   // Function to format keys by inserting spaces before capital letters
@@ -155,19 +163,24 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
             key === "DateTimeOriginal" ||
             key === "ModifyDate"
           ) {
-            displayValue = formatDate(value);
+            displayValue = value ? formatDate(value) : "N/A";
           } else if (key === "39321" || key === "Camera Settings") {
-            displayValue = formatCameraSettings(value);
+            displayValue = value ? formatCameraSettings(value) : "N/A";
           } else if (key === "39594" || key === "Unique Image ID") {
-            displayValue = formatUniqueImageID(value);
-          } else if (typeof value === "object") {
+            displayValue = value ? formatUniqueImageID(value) : "N/A";
+          } else if (typeof value === "object" && value !== null) {
             displayValue = JSON.stringify(value);
+          } else if (value === null || value === undefined) {
+            displayValue = "N/A";
           }
 
           return { key: displayKey, value: displayValue };
         })
         // Exclude items with large values
-        .filter((item) => item.value.length < 100)
+        .filter((item) => {
+          const valueLength = item.value ? item.value.toString().length : 0;
+          return valueLength < 100;
+        })
     : [];
 
   // Prepare location data for PDF export
@@ -265,6 +278,23 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
           </div>
         )}
 
+        {/* Image Dimensions Card */}
+        {fileDetails?.width && fileDetails?.height && (
+          <div className="mb-6 flex justify-center">
+            <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-4">
+              <strong className="text-gray-800 dark:text-white block text-center">
+                Image Dimensions:
+              </strong>
+              <div className="mt-2 text-gray-700 dark:text-gray-300 text-center">
+                {fileDetails.width} x {fileDetails.height} pixels
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* AI Detection Component */}
+        <AIDetector imageSrc={imageSrc} />
+
         {/* Grid layout for info cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {fileDetails?.name && (
@@ -295,13 +325,15 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
               </span>
             </div>
           )}
-          {locationName && (
+          {latitude && longitude && (
             <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-4">
               <strong className="text-gray-800 dark:text-white">
                 Location:
               </strong>{" "}
               <span className="text-gray-700 dark:text-gray-300">
-                {locationName}
+                {locationLoading
+                  ? "Fetching location..."
+                  : locationName || "N/A"}
               </span>
             </div>
           )}
@@ -309,24 +341,26 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
 
         {/* Map Container */}
         {latitude && longitude && L && typeof window !== "undefined" && (
-          <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-4 my-6">
-            <h3 className="text-xl font-semibold mb-2 text-center text-gray-800 dark:text-white">
-              Location on Map
-            </h3>
-            <MapContainer
-              center={[latitude, longitude]}
-              zoom={13}
-              style={{ height: "300px", width: "100%" }}
-              className="rounded-lg shadow-lg"
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; OpenStreetMap contributors"
-              />
-              <Marker position={[latitude, longitude]}>
-                <Popup>{locationName || "Location coordinates"}</Popup>
-              </Marker>
-            </MapContainer>
+          <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-4 my-6 flex justify-center">
+            <div className="w-full md:w-3/4">
+              <h3 className="text-xl font-semibold mb-2 text-center text-gray-800 dark:text-white">
+                Location on Map
+              </h3>
+              <MapContainer
+                center={[latitude, longitude]}
+                zoom={13}
+                style={{ height: "300px", width: "100%" }}
+                className="rounded-lg shadow-lg"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution="&copy; OpenStreetMap contributors"
+                />
+                <Marker position={[latitude, longitude]}>
+                  <Popup>{locationName || "Location coordinates"}</Popup>
+                </Marker>
+              </MapContainer>
+            </div>
           </div>
         )}
 
