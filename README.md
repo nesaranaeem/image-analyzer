@@ -1,40 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Image Analyzer App
+
+A powerful image analyzer app that provides in-depth insights into uploaded images, including color distribution, EXIF data extraction, AI generation probability, and OCR-based text recognition. This application is built using Next.js and leverages a variety of advanced libraries to offer robust image processing capabilities directly in the browser.
 
 ## Getting Started
 
-First, run the development server:
+**Prerequisites**
+
+- Node.js (v14.x or higher recommended)
+- npm (v7.x or higher recommended)
+
+## Installation
+
+Clone this repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+  git clone https://github.com/nesaranaeem/image-analyzer.git
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Navigate to the project directory:
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```bash
+  cd image-analyzer
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+Install dependencies
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+```bash
+  npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Start the server
 
-## Learn More
+```bash
+  npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🔧 Main Technologies Used
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+- Next.js - The React framework for building production-grade applications.
+- TensorFlow.js - Provides AI capabilities for analyzing images.
+- Tailwind CSS - Utility-first CSS framework for styling.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ✨ Features
 
-## Deploy on Vercel
+- Image Color Analysis: Detects dominant colors and displays a visual color distribution graph.
+- EXIF Data Extraction: Extracts and displays - EXIF metadata, including GPS coordinates, camera settings, and more.
+- Export Data: Data can be export as PDF
+- AI Generation Probability: Utilizes NSFWJS to determine if an image might be AI-generated.
+- OCR Text Recognition: Extracts text from images in multiple languages (English, Bengali, Arabic, Spanish).
+- Interactive UI: Provides a responsive and - user-friendly experience with modern design elements.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📚 Usage
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+**1. Upload an Image:** _Drag and drop an image or select one from your device._
+
+**2. View Insights:** _Once uploaded, the app will analyze the image, displaying:_
+
+- Color Distribution with a visual chart
+- EXIF Data such as camera details and geolocation
+- AI Generation Probability meter
+- Extracted Text using OCR (if any text is present)
+- Copy Colors: Click on detected colors to copy their hex codes to the clipboard.
+  **Note: This app does not store or upload your images. All processing occurs locally within your browser.**
+
+## 🔗 Links
+
+[![portfolio](https://img.shields.io/badge/portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://nesaran.com/)
+[![github](https://img.shields.io/badge/github-333?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nesaranaeem)
+[![facebook](https://img.shields.io/badge/facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://facebook.com/nesaranaeem)
+[![instagram](https://img.shields.io/badge/instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/nesaranaeem)
+[![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/nesaranaeem)
+[![x](https://img.shields.io/badge/X-1DA1F2?style=for-the-badge&logo=x&logoColor=white)](https://twitter.com/nesaranaeem)
+
+## Demo
+
+https://next-image-analyzer.vercel.app/

@@ -1,5 +1,5 @@
 // pages/index.js
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import exifr from "exifr";
 import ExifData from "../components/ExifData";
@@ -8,6 +8,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Dropzone from "../components/Dropzone";
 import ColorThief from "colorthief";
+import InfoModal from "../components/InfoModal";
 
 const IndexPage = () => {
   const [imageSrc, setImageSrc] = useState(null);
@@ -16,6 +17,7 @@ const IndexPage = () => {
   const [colors, setColors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageTitle, setPageTitle] = useState("Image Analyzer");
+  const [showModal, setShowModal] = useState(false);
   const siteName = "Image Analyzer";
 
   // New function to reset the state
@@ -26,6 +28,17 @@ const IndexPage = () => {
     setColors([]);
     setPageTitle("Image Analyzer");
   };
+
+  // Check if it's the user's first visit
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hasVisited = localStorage.getItem("hasVisited");
+      if (!hasVisited) {
+        setShowModal(true);
+        localStorage.setItem("hasVisited", "true");
+      }
+    }
+  }, []);
 
   const onDrop = async (acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -104,8 +117,8 @@ const IndexPage = () => {
 
           {loading && <Loader />}
 
-          {/* Show ExifData and Reset button if data is available */}
-          {exifData && (
+          {/* Show ExifData and Reset button if image is uploaded */}
+          {imageSrc && (
             <>
               {/* Reset Button */}
               <div className="flex justify-center mt-2">
@@ -128,6 +141,9 @@ const IndexPage = () => {
           )}
         </main>
         <Footer />
+
+        {/* Info Modal */}
+        {showModal && <InfoModal setShowModal={setShowModal} />}
       </div>
     </>
   );

@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import { Buffer } from "buffer";
 import PdfExporter from "./PdfExporter";
 import AIDetector from "./AIDetector";
-
+import ColorAnalysis from "./ColorAnalysis";
 // Ensure Buffer is available
 if (typeof window !== "undefined") {
   window.Buffer = window.Buffer || Buffer;
@@ -38,6 +38,9 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
   const [locationName, setLocationName] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [L, setL] = useState(null);
+
+  // Check if EXIF data is available
+  const hasExifData = exifData && Object.keys(exifData).length > 0;
 
   // Dynamically import Leaflet and fix the marker images
   useEffect(() => {
@@ -85,6 +88,8 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
           setLocationName("Location not found");
           setLocationLoading(false);
         });
+    } else {
+      setLocationName("No Location data found");
     }
   }, [latitude, longitude]);
 
@@ -145,7 +150,7 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
   };
 
   // Filter and map exifData to an array of {key, value}
-  const exifEntries = exifData
+  const exifEntries = hasExifData
     ? Object.entries(exifData)
         .map(([key, value]) => {
           let displayKey = key;
@@ -244,39 +249,8 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
           </div>
         )}
 
-        {/* Main Colors Card */}
-        {colors && colors.length > 0 && (
-          <div className="mb-6 flex justify-center">
-            <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-4">
-              <strong className="text-gray-800 dark:text-white block text-center">
-                Main Colors:
-              </strong>
-              <div className="flex space-x-2 mt-2 justify-center">
-                {colors.map((color, index) => {
-                  const hexColor = rgbToHex(color);
-                  return (
-                    <div
-                      key={index}
-                      className="w-8 h-8 rounded cursor-pointer border border-gray-300"
-                      style={{
-                        backgroundColor: hexColor,
-                      }}
-                      onClick={() => {
-                        try {
-                          navigator.clipboard.writeText(hexColor);
-                          alert(`Copied: ${hexColor}`);
-                        } catch (err) {
-                          alert("Failed to copy color code.");
-                        }
-                      }}
-                      title={`Click to copy ${hexColor}`}
-                    ></div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Color Analysis Component */}
+        <ColorAnalysis imageSrc={imageSrc} colors={colors} />
 
         {/* Image Dimensions Card */}
         {fileDetails?.width && fileDetails?.height && (
@@ -325,18 +299,17 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
               </span>
             </div>
           )}
-          {latitude && longitude && (
-            <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-4">
-              <strong className="text-gray-800 dark:text-white">
-                Location:
-              </strong>{" "}
-              <span className="text-gray-700 dark:text-gray-300">
-                {locationLoading
+          {/* Location Card */}
+          <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-4">
+            <strong className="text-gray-800 dark:text-white">Location:</strong>{" "}
+            <span className="text-gray-700 dark:text-gray-300">
+              {latitude && longitude
+                ? locationLoading
                   ? "Fetching location..."
-                  : locationName || "N/A"}
-              </span>
-            </div>
-          )}
+                  : locationName || "N/A"
+                : "No Location data found"}
+            </span>
+          </div>
         </div>
 
         {/* Map Container */}
@@ -364,22 +337,37 @@ const ExifData = ({ exifData, fileDetails, colors, siteName, imageSrc }) => {
           </div>
         )}
 
-        {/* Remaining EXIF Data */}
-        {exifEntries.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-            {exifEntries.map(({ key, value }) => (
-              <div
-                className="bg-white dark:bg-gray-800 rounded shadow-lg p-4"
-                key={key}
-              >
-                <strong className="text-gray-800 dark:text-white">
-                  {key}:
-                </strong>{" "}
-                <span className="text-gray-700 dark:text-gray-300">
-                  {value}
-                </span>
-              </div>
-            ))}
+        {/* EXIF Data Section */}
+        {hasExifData ? (
+          exifEntries.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+              {exifEntries.map(({ key, value }) => (
+                <div
+                  className="bg-white dark:bg-gray-800 rounded shadow-lg p-4"
+                  key={key}
+                >
+                  <strong className="text-gray-800 dark:text-white">
+                    {key}:
+                  </strong>{" "}
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          <div className="mt-6 text-center bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg border border-yellow-300 dark:border-yellow-700">
+            <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
+              Message
+            </h3>
+            <p className="text-yellow-800 dark:text-yellow-300 font-medium">
+              No EXIF data found. It is likely that this image was downloaded
+              from the internet. Note that platforms like Facebook remove all
+              kinds of EXIF data. If the uploaded image was downloaded from
+              Facebook, this is expected as downloaded images from Facebook do
+              not have any EXIF data.
+            </p>
           </div>
         )}
       </div>
