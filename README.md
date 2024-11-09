@@ -2,6 +2,10 @@
 
 A powerful image analyzer app that provides in-depth insights into uploaded images, including color distribution, EXIF data extraction, AI generation probability, and OCR-based text recognition. This application is built using Next.js and leverages a variety of advanced libraries to offer robust image processing capabilities directly in the browser.
 
+## More Info
+
+https://nesaran.com/project/image-analyzer-app/
+
 ## Getting Started
 
 **Prerequisites**
