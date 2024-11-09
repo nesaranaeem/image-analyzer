@@ -8,7 +8,7 @@ export const analyzeImage = async (imageFile) => {
       url: "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
       data: imageFile,
       headers: {
-        Authorization: `Bearer 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`,
+        Authorization: `Bearer test`,
         "Content-Type": "application/octet-stream",
       },
     });
